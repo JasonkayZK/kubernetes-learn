@@ -8,7 +8,7 @@
 
 在学习时主要使用的书籍是：
 
--   [Kubernetes in Action中文版](https://book.douban.com/subject/30418855/)
+-   [《Kubernetes in Action中文版》](https://book.douban.com/subject/30418855/)
 
 书籍资源下载：
 
@@ -23,6 +23,11 @@ Kubernetes集群搭建：
 
 -   Github Pages：[在VMWare中部署你的K8S集群](https://jasonkayzk.github.io/2021/05/16/在VMWare中部署你的K8S集群/)
 -   国内Gitee镜像：[在VMWare中部署你的K8S集群](https://jasonkay.gitee.io/2021/05/16/在VMWare中部署你的K8S集群/)
+
+使用Minikube搭建单节点Kubernetes集群：
+
+-   Github Pages：[CentOS7安装minikube](https://jasonkayzk.github.io/2021/05/26/CentOS7%E5%AE%89%E8%A3%85minikube/)
+-   国内Gitee镜像：[CentOS7安装minikube](https://jasonkay.gitee.io/2021/05/26/CentOS7%E5%AE%89%E8%A3%85minikube/)
 
 
 
@@ -39,4 +44,11 @@ Kubernetes集群搭建：
 ### 相关仓库
 
 -   [luksa/kubernetes-in-action](https://github.com/luksa/kubernetes-in-action)
+
+
+
+### 相关阅读
+
+-   [为你的Docker瘦身](https://jasonkayzk.github.io/2020/04/26/%E4%B8%BA%E4%BD%A0%E7%9A%84Docker%E7%98%A6%E8%BA%AB/)
+-   [Dockerfile学习](https://jasonkayzk.github.io/2019/10/16/Dockerfile%E5%AD%A6%E4%B9%A0/)
 
