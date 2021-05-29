@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: batch-job-multi-completion
+spec:
+#  selector:
+#    matchLabels:
+#      app: batch-job
+  completions: 5
+  template:
+    metadata:
+      labels:
+        app: batch-job
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: main
+          image: jasonkay/batch-job:latest

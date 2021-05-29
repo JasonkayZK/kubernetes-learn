@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: batch-job-time-limited
+spec:
+#  selector:
+#    matchLabels:
+#      app: batch-job
+  activeDeadlineSeconds: 30
+  backoffLimit: 2 # Job被标记为失败前可重试的次数，默认为6
+  template:
+    metadata:
+      labels:
+        app: batch-job
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: main
+          image: jasonkay/batch-job:latest

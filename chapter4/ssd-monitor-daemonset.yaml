@@ -1,0 +1,19 @@
+# k8s: 18.1.17
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: ssd-monitor-daemonset
+spec:
+  selector:
+    matchLabels:
+      app: ssd-monitor
+  template:
+    metadata:
+      labels:
+        app: ssd-monitor
+    spec:
+      containers:
+        - name: main
+          image: jasonkay/ssd-monitor:latest
+      nodeSelector:
+        disk: ssd
