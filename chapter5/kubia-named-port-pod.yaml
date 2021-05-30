@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubia-named-port
+  labels:
+    app: kubia-named-port
+spec:
+  containers:
+  - name: kubia
+    image: jasonkay/kubia:latest
+    ports:
+    - containerPort: 8080
+      protocol: TCP
+      name: http
+    - containerPort: 8443
+      name: https
+      protocol: TCP
