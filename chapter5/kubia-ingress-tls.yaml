@@ -1,0 +1,20 @@
+# k8s: v1.18.17
+# info: https://kubernetes.io/blog/2019/07/18/api-deprecations-in-1-16/
+apiVersion: networking.k8s.io/v1beta1
+#apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: kubia-tls
+spec:
+  tls:
+    - hosts:
+      - kubia.example.com
+      secretName: tls-secret
+  rules:
+    - host: kubia.example.com
+      http:
+        paths:
+          - backend:
+              serviceName: kubia-nodeport
+              servicePort: 80
+            path: /
