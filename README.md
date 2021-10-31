@@ -36,6 +36,7 @@ Kubernetes集群搭建：
 | **分支**                                                     | **创建时间** | **备注**                                                     |
 | ------------------------------------------------------------ | ------------ | ------------------------------------------------------------ |
 | [book-learn](https://github.com/JasonkayZK/kubernetes-learn/tree/book-learn) | 2021-05-26   | 一个通过[《Kubernetes in Action中文版》](https://book.douban.com/subject/30418855/)学习Kubernetes的分支； |
+| [go-hello-deploy-demo](https://github.com/JasonkayZK/kubernetes-learn/tree/go-hello-deploy-demo) | 2021-10-31   | 一个在K8S部署简单Go项目的Demo；<br />文章[《使用K8S部署最简单的Go应用》](https://jasonkayzk.github.io/2021/10/31/使用K8S部署最简单的Go应用/)源码； |
 |                                                              |              |                                                              |
 |                                                              |              |                                                              |
 
