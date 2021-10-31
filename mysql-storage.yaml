@@ -1,0 +1,35 @@
+# PV-PersistentVolume
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  namespace: my-workspace
+  name: mysql-pv-volume
+  labels:
+    type: local
+    app: mysql # 设置 pv 的 label 标签
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 20Gi # 设置 pv 存储资源大小
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/k8s-mysql-data"
+
+---
+# PVC-PersistentVolumeClaim
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: my-workspace
+  name: mysql-pv-claim
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  selector:
+    matchLabels:
+      app: mysql #根据 Label 选择对应 PV
