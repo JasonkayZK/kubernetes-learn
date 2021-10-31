@@ -27,7 +27,7 @@ Open browser to:
 
 It’s ok to see:
 
-![wechat](https://cdn.jsdelivr.net/gh/jasonkayzk/kubernetes-learn@go-hello-deploy-demo/images/demo1.png)
+![demo1](https://cdn.jsdelivr.net/gh/jasonkayzk/kubernetes-learn@go-hello-deploy-demo/images/demo1.png)
 
 And `Health check`;
 
@@ -145,7 +145,7 @@ go-hello-app-555c69b994-zwdb7   2/2     Running   0          54m
 
 Second, use dashboard to check:
 
-![wechat](https://cdn.jsdelivr.net/gh/jasonkayzk/kubernetes-learn@go-hello-deploy-demo/images/demo2.png)
+![demo2](https://cdn.jsdelivr.net/gh/jasonkayzk/kubernetes-learn@go-hello-deploy-demo/images/demo2.png)
 
 Finally, Visit NodePort to check:
 
@@ -153,7 +153,7 @@ Finally, Visit NodePort to check:
 
 And you will see just as the same as:
 
-![wechat](https://cdn.jsdelivr.net/gh/jasonkayzk/kubernetes-learn@go-hello-deploy-demo/images/demo1.png)
+![demo1](https://cdn.jsdelivr.net/gh/jasonkayzk/kubernetes-learn@go-hello-deploy-demo/images/demo1.png)
 
 <br/>
 
