@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-k8s
+spec:
+  selector:
+    app: test-k8s
+  type: NodePort
+  ports:
+    - port: 8080        # 本 Service 的端口
+      name: test-k8s    # 必须配置
+      targetPort: 8080  # 容器端口
+      nodePort: 31000   # 节点端口，范围固定 30000 ~ 32767
+    - port: 8090
+      name: test-other
+      targetPort: 8090
+      nodePort: 32000
