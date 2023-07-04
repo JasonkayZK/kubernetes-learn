@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  serviceName: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:4.4
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /data/db
+              name: mongo-data
+      volumes:
+        - name: mongo-data
+          persistentVolumeClaim:
+            claimName: mongodata-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+spec:
+  clusterIP: None
+  ports:
+    - port: 27017
+      protocol: TCP
+      targetPort: 27017
+  selector:
+    app: mongodb
+  type: ClusterIP
+
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongodata-pv
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 2Gi
+  volumeMode: Filesystem  # Filesystem（文件系统） Block（块）
+  accessModes:
+    - ReadWriteOnce       # 卷可以被一个节点以读写方式挂载
+  persistentVolumeReclaimPolicy: Delete
+  storageClassName: local-storage
+  local:
+    path: /data
+  nodeAffinity:
+    required:
+      # 通过 hostname 限定在某个节点创建存储卷
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+                - "k3d-my-k3s-server-0"
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodata-pvc
+spec:
+  accessModes: [ "ReadWriteOnce" ]
+  storageClassName: "local-storage"
+  resources:
+    requests:
+      storage: 2Gi
