@@ -3,32 +3,25 @@
 一个学习Kubernetes的仓库；
 
 
-
 ### 资源下载
 
 在学习时主要使用的书籍是：
 
 -   [《Kubernetes in Action中文版》](https://book.douban.com/subject/30418855/)
 
-书籍资源下载：
-
--   Github Pages：[文件分享](https://jasonkayzk.github.io/sharing/)
--   国内Gitee镜像：[文件分享](https://jasonkay.gitee.io/sharing/)
-
-
-
 ### 环境搭建
+
+使用Kuboard搭建集群（推荐）：
+
+- [《使用Kuboard快速部署Kubernetes集群》](https://jasonkayzk.github.io/2023/12/14/使用Kuboard快速部署Kubernetes集群/)
 
 Kubernetes集群搭建：
 
--   Github Pages：[在VMWare中部署你的K8S集群](https://jasonkayzk.github.io/2021/05/16/在VMWare中部署你的K8S集群/)
--   国内Gitee镜像：[在VMWare中部署你的K8S集群](https://jasonkay.gitee.io/2021/05/16/在VMWare中部署你的K8S集群/)
+- [《在VMWare中部署你的K8S集群》](https://jasonkayzk.github.io/2021/05/16/在VMWare中部署你的K8S集群/)
 
 使用Minikube搭建单节点Kubernetes集群：
 
--   Github Pages：[CentOS7安装minikube](https://jasonkayzk.github.io/2021/05/26/CentOS7%E5%AE%89%E8%A3%85minikube/)
--   国内Gitee镜像：[CentOS7安装minikube](https://jasonkay.gitee.io/2021/05/26/CentOS7%E5%AE%89%E8%A3%85minikube/)
-
+- [《CentOS7安装minikube》](https://jasonkayzk.github.io/2021/05/26/CentOS7%E5%AE%89%E8%A3%85minikube/)
 
 
 ### 学习分支
