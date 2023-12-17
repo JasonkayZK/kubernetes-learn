@@ -1,0 +1,27 @@
+spring:
+  kafka:
+    producer:
+      bootstrap-servers:
+        - localhost:9092
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      bootstrap-servers:
+        - localhost:9092
+      auto-offset-reset: earliest
+
+# custom kafka topic config
+kafka:
+  topic:
+    my-topic: my-topic
+    my-topic2: my-topic2
+
+  topics:
+    - name: topic0
+      num-partitions: 3
+      replication-factor: 1
+    - name: topic1
+      num-partitions: 1
+      replication-factor: 1
+    - name: topic2
+      num-partitions: 2
+      replication-factor: 1
