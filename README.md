@@ -2,11 +2,10 @@
 
 A demo to show how to deploy SpringBoot 2.x to k8s.
 
-## Test Application
+Modules:
 
-```shell
-curl -X POST -F 'name=Java' http://localhost:8080/book
-```
+- [ch01-hello](ch01-hello/)
+- [ch02-kafka-integrate](ch02-kafka-integrate/)
 
 
 ## Reference
