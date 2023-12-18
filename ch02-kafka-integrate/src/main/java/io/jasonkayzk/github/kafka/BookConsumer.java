@@ -10,6 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author zk
+ */
 @Service
 public class BookConsumer {
 
@@ -22,7 +25,7 @@ public class BookConsumer {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @KafkaListener(topics = {"${kafka.topic.my-topic}"}, groupId = "group1")
+    @KafkaListener(topics = {"${kafka.topic.my-topic}"}, groupId = "group1", containerFactory = "bookContainerFactory")
     public void consumeMessage(ConsumerRecord<String, String> bookConsumerRecord) {
         try {
             Book book = objectMapper.readValue(bookConsumerRecord.value(), Book.class);
@@ -32,7 +35,7 @@ public class BookConsumer {
         }
     }
 
-    @KafkaListener(topics = {"${kafka.topic.my-topic2}"}, groupId = "group2")
+    @KafkaListener(topics = {"${kafka.topic.my-topic2}"}, groupId = "group2", containerFactory = "bookContainerFactory")
     public void consumeMessage2(Book book) {
         logger.info("消费者消费topic:{} 的消息 -> {}", myTopic2, book.toString());
     }

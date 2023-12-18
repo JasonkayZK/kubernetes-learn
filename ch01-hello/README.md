@@ -19,5 +19,6 @@ kubectl apply -f deploy/deployment.yaml
 ## Test
 
 ```shell
-curl <k8s-node-ip>:8080
+# Curl node port
+curl <k8s-node-ip>:32080
 ```

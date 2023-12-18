@@ -1,0 +1,23 @@
+server:
+  port: 8080
+
+spring:
+  kafka:
+    bootstrap-servers: 'kafka-broker-0.kafka-broker-headless.workspace.svc.cluster.local:9092,kafka-broker-1.kafka-broker-headless.workspace.svc.cluster.local:9092,kafka-broker-2.kafka-broker-headless.workspace.svc.cluster.local:9092'
+
+# custom kafka topic config
+kafka:
+  sasl-enable: true
+  topic:
+    my-topic: my-topic
+    my-topic2: my-topic2
+  topics:
+    - name: topic0
+      num-partitions: 3
+      replication-factor: 1
+    - name: topic1
+      num-partitions: 1
+      replication-factor: 1
+    - name: topic2
+      num-partitions: 2
+      replication-factor: 1

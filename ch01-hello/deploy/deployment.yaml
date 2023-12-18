@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: java-hello-app
+  name: java-deploy-app
   namespace: workspace # 声明工作空间，默认为default
 spec:
   replicas: 3
   selector:
     matchLabels:
-      name: java-hello-app
+      name: java-deploy-app
   template:
     metadata:
       labels:
-        name: java-hello-app
+        name: java-deploy-app
     spec:
       containers:
-        - name: java-hello-container
-          image: jasonkay/java-hello-app:v1.0.0
+        - name: java-deploy-container
+          image: jasonkay/java-deploy-app:v1.0.0
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080 # containerPort是声明容器内部的port
@@ -25,7 +25,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: java-hello-app-service
+  name: java-deploy-app-service
   namespace: workspace # 声明工作空间，默认为default
 spec:
   type: NodePort
@@ -35,4 +35,4 @@ spec:
       targetPort: 8080 # Pod的外部访问端口，port和nodePort的数据通过这个端口进入到Pod内部，Pod里面的containers的端口映射到这个端口，提供服务
       nodePort: 32080 # Node节点的端口，<nodeIP>:nodePort 是提供给集群外部客户访问service的入口
   selector:
-    name: java-hello-app
+    name: java-deploy-app
