@@ -1,12 +1,17 @@
 import urllib3
+
 from kubernetes.client import api_client
 from kubernetes.client.api import core_v1_api
-from kubernetes import client
+from kubernetes import client, config
 
 
 class KubernetesHandler(object):
+    __K8S_URL: str = 'https://10.147.17.30:6443'
+    __K8S_TOKEN: str = None
+    __K8S_CONFIG_FILE: str = "kube-config.yaml"
+
     def __init__(self):
-        self.k8s_url = 'https://10.147.17.30:6443'
+        pass
 
     @staticmethod
     def get_token():
@@ -14,57 +19,57 @@ class KubernetesHandler(object):
         获取token
         :return:
         """
-        with open(r'kube-token.txt', 'r') as file:
-            token = file.read().strip('\n')
-            return token
+        if not KubernetesHandler.__K8S_TOKEN:
+            with open(r'kube-token.txt', 'r') as file:
+                KubernetesHandler.__K8S_TOKEN = file.read().strip('\n')
+        return KubernetesHandler.__K8S_TOKEN
 
-    def get_api(self):
+    @staticmethod
+    def get_client_by_token():
         """
-        获取API的CoreV1Api版本对象
+        通过Token获取API的Client
         :return:
         """
         configuration = client.Configuration()
-        configuration.host = self.k8s_url
+        configuration.host = KubernetesHandler.__K8S_URL
         configuration.verify_ssl = False
-        configuration.api_key = {"authorization": "Bearer " + self.get_token()}
+        configuration.api_key = {"authorization": "Bearer " + KubernetesHandler.get_token()}
         client1 = api_client.ApiClient(configuration=configuration)
-        api = core_v1_api.CoreV1Api(client1)
-        return api
+        cli = core_v1_api.CoreV1Api(client1)
+        return cli
 
-    def get_namespace_list(self):
+    @staticmethod
+    def get_client_by_config():
         """
-        获取命名空间列表
+        通过Config文件获取Client
         :return:
         """
-        api = self.get_api()
-        namespaces = []
-        for ns in api.list_namespace().items:
-            # print(ns.metadata.name)
-            namespaces.append(ns.metadata.name)
-        return namespaces
-
-    def get_pod_list(self):
-        api = self.get_api()
-        return api.list_pod_for_all_namespaces(watch=False)
-
-    def get_service_list(self):
-        api = self.get_api()
-        return api.list_service_for_all_namespaces(watch=False)
+        config.kube_config.load_kube_config(config_file=KubernetesHandler.__K8S_CONFIG_FILE)
+        return client.CoreV1Api()
 
 
 if __name__ == '__main__':
     urllib3.disable_warnings()
 
-    namespace_list = KubernetesHandler().get_namespace_list()
+    cli = KubernetesHandler.get_client_by_token()
+    # cli = KubernetesHandler.get_client_by_config()
+
+    # 获取所有 Namespace
+    namespace_list = []
+    for ns in cli.list_namespace().items:
+        # print(ns.metadata.name)
+        namespace_list.append(ns.metadata.name)
     print('Namespace list:\n', namespace_list, '\n')
 
-    pod_list = KubernetesHandler().get_pod_list()
+    # 获取所有 Pod
+    pod_list = cli.list_pod_for_all_namespaces(watch=False)
     print("Listing pods with their IPs:\n")
     for i in pod_list.items:
         print("%s\t%s\t%s" % (i.status.pod_ip, i.metadata.namespace, i.metadata.name))
     print()
 
-    services = KubernetesHandler().get_service_list()
+    # 获取所有 Service
+    services = cli.list_service_for_all_namespaces(watch=False)
     print('Service list:')
     for i in services.items:
         print("%s \t%s \t%s \t%s \t%s \n" % (
