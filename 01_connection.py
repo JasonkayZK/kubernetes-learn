@@ -1,5 +1,3 @@
-import urllib3
-
 from kubernetes.client import api_client
 from kubernetes.client.api import core_v1_api
 from kubernetes import client, config
@@ -9,6 +7,7 @@ class KubernetesHandler(object):
     __K8S_URL: str = 'https://10.147.17.30:6443'
     __K8S_TOKEN: str = None
     __K8S_CONFIG_FILE: str = "kube-config.yaml"
+    __K8S_TOKEN_FILE: str = "kube-token.txt"
 
     def __init__(self):
         pass
@@ -20,7 +19,7 @@ class KubernetesHandler(object):
         :return:
         """
         if not KubernetesHandler.__K8S_TOKEN:
-            with open(r'kube-token.txt', 'r') as file:
+            with open(KubernetesHandler.__K8S_TOKEN_FILE, 'r') as file:
                 KubernetesHandler.__K8S_TOKEN = file.read().strip('\n')
         return KubernetesHandler.__K8S_TOKEN
 
@@ -49,8 +48,6 @@ class KubernetesHandler(object):
 
 
 if __name__ == '__main__':
-    urllib3.disable_warnings()
-
     cli = KubernetesHandler.get_client_by_token()
     # cli = KubernetesHandler.get_client_by_config()
 
