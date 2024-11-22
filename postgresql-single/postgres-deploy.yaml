@@ -1,0 +1,61 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgresql-data-pvc
+spec:
+  storageClassName: nfs-storage
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 15G
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-deployment
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: registry.cn-hangzhou.aliyuncs.com/jasonkay/postgres:16.5
+          imagePullPolicy: "IfNotPresent"
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgredb
+      volumes:
+        - name: postgredb
+          persistentVolumeClaim:
+            claimName: postgresql-data-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-svc
+  labels:
+    app: postgres
+spec:
+  type: NodePort
+  ports:
+    - port: 5432
+      targetPort: 5432
+      protocol: TCP
+  selector:
+    app: postgres

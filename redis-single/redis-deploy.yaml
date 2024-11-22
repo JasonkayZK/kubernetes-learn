@@ -1,0 +1,65 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: gitlab-redis-data-pvc
+spec:
+  storageClassName: nfs-storage #使用存储类自行替换，不是根据时间情况创建
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5G
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-redis-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab-redis
+  template:
+    metadata:
+      labels:
+        app: gitlab-redis
+    spec:
+      containers:
+      - image: registry.cn-hangzhou.aliyuncs.com/jasonkay/redis:7.0.5
+        command: ["redis-server","/etc/redis/redis.conf"]
+        name: gitlab-redis
+        ports:
+        - containerPort: 6379        
+        volumeMounts:
+        - name: redis-config
+          mountPath: /etc/redis/redis.conf
+          subPath: redis.conf
+        - name: redis-data
+          mountPath: /data
+      volumes:
+      - name: redis-config
+        configMap:
+          name: redis-config
+      - name: redis-data
+        persistentVolumeClaim:
+          claimName: gitlab-redis-data-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: gitlab-redis-svc
+  name: gitlab-redis-svc
+spec:
+  type: NodePort
+  selector:
+    app: gitlab-redis
+  ports:
+  - name: tcp-redis-6379
+    port: 6379
+    protocol: TCP
+    targetPort: 6379

@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: windows-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 64Gi
+  volumeName: windows-data
+  storageClassName: pz-ssd
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: windows
+  labels:
+    name: windows
+spec:
+  terminationGracePeriodSeconds: 120 # the Kubernetes default is 30 seconds and it may be not enough
+  containers:
+    - name: windows
+      image: registry.cn-hangzhou.aliyuncs.com/jasonkay/windows:4.04
+      ports:
+        - containerPort: 8006
+          protocol: TCP
+        - containerPort: 3389
+          protocol: TCP
+        - containerPort: 3389
+          protocol: UDP
+      securityContext:
+        privileged: true
+      env:
+        - name: VERSION
+          value: "10"
+        - name: RAM_SIZE
+          value: "8G"
+        - name: CPU_CORES
+          value: "4"
+        - name: DISK_SIZE
+          value: "64G"
+        - name: USERNAME
+          value: "Docker"
+        - name: PASSWORD
+          value: "pzxy@123456"
+
+      volumeMounts:
+        - mountPath: /storage
+          name: storage
+        - mountPath: /dev/kvm
+          name: dev-kvm
+  volumes:
+    - name: storage
+      persistentVolumeClaim:
+        claimName: windows-pvc
+    - name: dev-kvm
+      hostPath:
+        path: /dev/kvm
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: windows
+spec:
+  type: NodePort
+  selector:
+    name: windows
+  ports:
+    - name: tcp-8006
+      protocol: TCP
+      port: 8006
+      targetPort: 8006
+    - name: tcp-3389
+      protocol: TCP
+      port: 3389
+      targetPort: 3389
+    - name: udp-3389
+      protocol: UDP
+      port: 3389
+      targetPort: 3389
