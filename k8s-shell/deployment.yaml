@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+spec:
+  replicas: 1 # 定义副本数量，这里创建3个Nginx副本
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: registry.cn-hangzhou.aliyuncs.com/jasonkay/nginx:latest # 使用最新版本的Nginx镜像
+        ports:
+        - containerPort: 80
