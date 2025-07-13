@@ -1,0 +1,115 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: label-studio
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-credentials
+  namespace: label-studio
+type: Opaque
+data:
+  accesskey: xxx  # ?????MinIO????
+  secretkey: yyy  # ?????MinIO????
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: label-studio-pvc
+  namespace: label-studio
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: label-studio
+  namespace: label-studio
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: label-studio
+  template:
+    metadata:
+      labels:
+        app: label-studio
+    spec:
+      containers:
+        - name: label-studio
+          image: registry.cn-hangzhou.aliyuncs.com/jasonkay/label-studio:1.20.0
+          ports:
+            - containerPort: 8080
+          env:
+            - name: LABEL_STUDIO_HOST
+              value: "http://your-nginx-ip:8080"  # ???Nginx??????IP???
+            - name: CSRF_TRUSTED_ORIGINS
+              value: "http://your-nginx-ip:8080"  # ???Nginx??????IP???
+            - name: SECURE_PROXY_SSL_HEADER
+              value: "HTTP_X_FORWARDED_PROTO,http"  # ??http
+            - name: LABEL_STUDIO_BASE_DATA_DIR
+              value: "/label-studio/data"
+            - name: LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED
+              value: "true"
+            - name: LABEL_STUDIO_DISABLE_SIGNUP_WITHOUT_LINK
+              value: "true"
+            - name: LABEL_STUDIO_USERNAME
+              value: "username" # ????????
+            - name: LABEL_STUDIO_PASSWORD
+              value: "password" # ???????
+            - name: LABEL_STUDIO_S3_ENABLED
+              value: "true"
+            - name: LABEL_STUDIO_S3_ENDPOINT_URL
+              value: "http://minio-service:9000"  # ?????MinIO????
+            - name: LABEL_STUDIO_S3_BUCKET
+              value: "label-studio"
+            - name: LABEL_STUDIO_S3_USE_HTTPS
+              value: "false"
+            - name: LABEL_STUDIO_S3_VERIFY_SSL
+              value: "false"
+            - name: LABEL_STUDIO_S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: minio-credentials
+                  key: accesskey
+            - name: LABEL_STUDIO_S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: minio-credentials
+                  key: secretkey
+          volumeMounts:
+            - name: data-volume
+              mountPath: /label-studio/data
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: label-studio-pvc
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: label-studio-service
+  namespace: label-studio
+spec:
+  type: NodePort
+  ports:
+    - name: http-8080
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+      nodePort: 32222
+  selector:
+    app: label-studio
