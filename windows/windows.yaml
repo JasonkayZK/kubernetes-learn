@@ -57,7 +57,7 @@ spec:
             - name: USERNAME
               value: "zk"
             - name: PASSWORD
-              value: "pzxy@123456"
+              value: "123456"
           # 添加资源限制（避免资源抢占）
           resources:
             requests:

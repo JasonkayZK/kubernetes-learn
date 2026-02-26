@@ -54,7 +54,7 @@ spec:
         - name: MINIO_ROOT_USER # 指定用户名
           value: "admin" 
         - name: MINIO_ROOT_PASSWORD # 指定密码，最少8位置
-          value: "pzxy@123456"
+          value: "123456"
       volumes:
       - name: data
         persistentVolumeClaim:

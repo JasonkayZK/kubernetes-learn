@@ -8,7 +8,7 @@ data:
   redis.conf: |-
     bind 0.0.0.0
     port 6379
-    #requirepass pzxy@123456
+    #requirepass 123456
     pidfile /var/run/redis_6379.pid
     save 900 1
     save 300 10

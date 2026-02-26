@@ -44,7 +44,7 @@ spec:
         - name: USERNAME
           value: "Docker"
         - name: PASSWORD
-          value: "pzxy@123456"
+          value: "123456"
 
       volumeMounts:
         - mountPath: /storage

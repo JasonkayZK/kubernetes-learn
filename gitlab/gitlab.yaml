@@ -73,7 +73,7 @@ spec:
             - name: GITLAB_SECRETS_OTP_KEY_BASE
               value: long-and-random-alpha-numeric-string
             - name: GITLAB_ROOT_PASSWORD
-              value: pzxy@123456
+              value: 123456
             - name: GITLAB_ROOT_EMAIL
               value: jasonkayzk@gmail.com
             - name: GITLAB_HOST
@@ -95,7 +95,7 @@ spec:
             - name: DB_USER
               value: pzxy
             - name: DB_PASS
-              value: pzxy@123456
+              value: 123456
             - name: DB_NAME
               value: postgresdb
             - name: REDIS_HOST

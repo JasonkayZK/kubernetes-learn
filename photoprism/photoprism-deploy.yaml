@@ -30,7 +30,7 @@ spec:
         - name: PHOTOPRISM_UPLOAD_NSFW
           value: "true"
         - name: PHOTOPRISM_ADMIN_PASSWORD
-          value: "pzxy@123456"
+          value: "123456"
         volumeMounts:
         - name: photoprism-storage
           mountPath: /photoprism/storage

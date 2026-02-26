@@ -28,7 +28,7 @@ spec:
         image: registry.cn-hangzhou.aliyuncs.com/jasonkay/mysql:8.0.39
         env:
         - name: MYSQL_ROOT_PASSWORD
-          value: 'pzxy@123456'
+          value: '123456'
         ports:
         - containerPort: 3306
         volumeMounts:
