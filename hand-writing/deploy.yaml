@@ -1,0 +1,115 @@
+# 2. 后端环境变量配置
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: handwriting-backend-config
+  namespace: zk
+data:
+  FONT_ASSETS_DIR: "/app/font_assets_host"
+  FONT_ASSETS_BUNDLED_DIR: "/app/font_assets"
+
+---
+# 3. 字体文件PVC（仅保留这个存储）
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: handwriting-font-pvc
+  namespace: zk
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# 4. 后端Deployment（优化名称+移除日志存储）
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: handwriting-backend
+  namespace: zk
+  labels:
+    app: handwriting-backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: handwriting-backend
+  template:
+    metadata:
+      labels:
+        app: handwriting-backend
+    spec:
+      containers:
+      - name: handwriting-backend
+        image: registry.cn-hangzhou.aliyuncs.com/jasonkay/backend-handwriting
+        ports:
+        - containerPort: 5005
+        envFrom:
+        - configMapRef:
+            name: handwriting-backend-config
+        # 仅挂载字体文件PVC
+        volumeMounts:
+        - name: font-files
+          mountPath: /app/font_assets_host
+      volumes:
+      - name: font-files
+        persistentVolumeClaim:
+          claimName: handwriting-font-pvc
+
+---
+# 5. 后端Service（改回名称为backend，适配前端Nginx）
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend  # 关键：改回backend，让前端Nginx能解析
+  namespace: zk
+spec:
+  selector:
+    app: handwriting-backend
+  ports:
+  - port: 5005
+    targetPort: 5005
+  type: ClusterIP
+
+---
+# 6. 前端Deployment（移除错误的hostAliases）
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: handwriting-frontend
+  namespace: zk
+  labels:
+    app: handwriting-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: handwriting-frontend
+  template:
+    metadata:
+      labels:
+        app: handwriting-frontend
+    spec:
+      containers:
+      - name: handwriting-frontend
+        image: registry.cn-hangzhou.aliyuncs.com/jasonkay/frontend-handwriting
+        ports:
+        - containerPort: 80
+
+---
+# 7. 前端Service（更换nodePort为30346，避免端口冲突）
+apiVersion: v1
+kind: Service
+metadata:
+  name: handwriting-frontend-svc
+  namespace: zk
+spec:
+  selector:
+    app: handwriting-frontend
+  ports:
+  - port: 80
+    targetPort: 80
+    nodePort: 30346  # 更换为未被占用的端口
+  type: NodePort

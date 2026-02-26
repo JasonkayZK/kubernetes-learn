@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: photoprism
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: photoprism
+  template:
+    metadata:
+      labels:
+        app: photoprism
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                  - pz-3
+      containers:
+      - name: photoprism
+        image: registry.cn-hangzhou.aliyuncs.com/jasonkay/photoprism:latest
+        ports:
+        - containerPort: 2342
+        env:
+        - name: PHOTOPRISM_UPLOAD_NSFW
+          value: "true"
+        - name: PHOTOPRISM_ADMIN_PASSWORD
+          value: "pzxy@123456"
+        volumeMounts:
+        - name: photoprism-storage
+          mountPath: /photoprism/storage
+        - name: photoprism-originals
+          mountPath: /photoprism/originals
+      volumes:
+      - name: photoprism-storage
+        hostPath:
+          path: /data/photoprism/storage # 请替换为实际的路径
+          type: Directory
+      - name: photoprism-originals
+        hostPath:
+          path: /data/photoprism/originals # 请替换为实际的路径
+          type: Directory
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: photoprism-service
+spec:
+  type: NodePort
+  selector:
+    app: photoprism
+  ports:
+    - protocol: TCP
+      port: 2342
+      targetPort: 2342
+      nodePort: 32342 # 可根据需要修改

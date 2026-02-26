@@ -1,0 +1,82 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: code-server
+
+---
+
+# PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: code-server-pvc  # PVC名称，后续Deployment将引用此名称
+  namespace: code-server  # 可根据需求修改命名空间
+spec:
+  storageClassName: nfs-storage  # 可根据需求修改存储类
+  accessModes:
+    - ReadWriteOnce  # 单节点读写权限（适合单机K8s或需要独占存储的场景）
+  resources:
+    requests:
+      storage: 50Gi  # 申请50GB存储，可根据需求调整
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: code-server-deploy
+  namespace: code-server
+  labels:
+    app: code-server
+spec:
+  selector:
+    matchLabels:
+      app: code-server
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: code-server
+    spec:
+      volumes:
+        - name: code-server-volume
+          persistentVolumeClaim:
+              claimName: code-server-pvc
+      initContainers:
+      - name: home-init
+        image: registry.cn-hangzhou.aliyuncs.com/jasonkay/busybox:1.37.0
+        command: ["sh", "-c", "chown -R 0777:0777 /home/code-server"]
+        volumeMounts:
+        - mountPath: "/home/code-server"
+          name: code-server-volume
+      containers:
+      - image: registry.cn-hangzhou.aliyuncs.com/jasonkay/code-server:4.104.3-bookworm
+        name: code-server
+        volumeMounts:
+          - mountPath: "/home/code-server"
+            name: code-server-volume
+        ports:
+        - containerPort: 8080
+        env:
+          - name: PASSWORD
+            value: pzxy@123456
+
+---
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: code-server-service
+  namespace: code-server
+spec:
+  type: NodePort  # 暴露方式：NodePort
+  selector:
+    app: code-server  # 匹配Pod的标签
+  ports:
+  - port: 8080  # Service内部端口（与Pod的containerPort一致）
+    protocol: TCP
+    targetPort: 8080  # 指向Pod的端口
+    nodePort: 32110  # 集群节点暴露的端口（范围：30000-32767，可自定义）

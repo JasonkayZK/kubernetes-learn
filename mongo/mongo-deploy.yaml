@@ -1,0 +1,59 @@
+# 1. 定义 PVC，用于持久化 MongoDB 数据
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce  # 单节点读写，符合 MongoDB 单实例部署场景
+  resources:
+    requests:
+      storage: 5Gi   # 申请 5GB 存储，可根据实际需求调整
+---
+# 2. 定义 Deployment，部署 MongoDB 实例
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  replicas: 1  # 单实例部署，如需集群可调整
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: registry.cn-hangzhou.aliyuncs.com/jasonkay/mongo:5.0.32  # 指定你要求的镜像
+        env:
+        - name: MONGO_INITDB_ROOT_USERNAME  # 设置 root 用户名
+          value: 'zk'
+        - name: MONGO_INITDB_ROOT_PASSWORD  # 设置 root 密码，建议后续改为 Secret 管理
+          value: 'zk18749663360'
+        ports:
+        - containerPort: 27017  # MongoDB 默认端口
+        volumeMounts:
+        - name: mongodb-persistent-storage  # 挂载 PVC 到容器内数据目录
+          mountPath: /data/db  # MongoDB 默认数据存储路径
+      volumes:
+      - name: mongodb-persistent-storage
+        persistentVolumeClaim:
+          claimName: mongodb-pvc  # 关联上面定义的 PVC
+---
+# 3. 定义 Service，通过 NodePort 暴露服务
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+spec:
+  type: NodePort  # 使用 NodePort 类型暴露服务
+  selector:
+    app: mongodb  # 关联 Deployment 的 Pod 标签
+  ports:
+    - protocol: TCP
+      port: 27017          # Service 内部端口
+      targetPort: 27017    # 容器端口
+      nodePort: 32317      # 你指定的 NodePort 端口

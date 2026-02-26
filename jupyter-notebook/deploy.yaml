@@ -1,0 +1,96 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jupyter
+
+---
+
+# PVC
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jupyter-pvc  # PVC名称，后续Deployment将引用此名称
+  namespace: jupyter  # 可根据需求修改命名空间
+spec:
+  storageClassName: nfs-storage  # 可根据需求修改存储类
+  accessModes:
+    - ReadWriteOnce  # 单节点读写权限（适合单机K8s或需要独占存储的场景）
+  resources:
+    requests:
+      storage: 50Gi  # 申请50GB存储，可根据需求调整
+
+---
+
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyter-deploy  # Deployment名称
+  namespace: jupyter  # 可根据需求修改命名空间
+  labels:
+    app: jupyter  # 标签，用于Service关联
+spec:
+  replicas: 1  # 部署1个Pod副本（单实例场景）
+  selector:
+    matchLabels:
+      app: jupyter  # 匹配Pod的标签
+  template:
+    metadata:
+      labels:
+        app: jupyter  # Pod标签，与Deployment selector对应
+    spec:
+      containers:
+      - name: jupyter-container  # 容器名称
+        image: registry.cn-hangzhou.aliyuncs.com/jasonkay/base-notebook:x86_64-python-3.11.6  # 阿里云镜像
+        ports:
+        - containerPort: 8888  # 容器内部端口（Jupyter默认端口）
+        volumeMounts:
+        - name: jupyter-storage  # 存储卷名称，与下方volumes对应
+          mountPath: /home/jovyan  # 容器内挂载路径（Jupyter默认工作目录）
+          subPath: jovyan  # 可选：在PVC中划分独立子目录，避免目录污染
+        # 资源限制（可选，根据服务器配置调整）
+        # resources:
+        #   requests:
+        #     memory: "512Mi"  # 最小申请内存
+        #     cpu: "500m"      # 最小申请CPU（0.5核）
+        #   limits:
+        #     memory: "2Gi"    # 最大允许内存
+        #     cpu: "1000m"     # 最大允许CPU（1核）
+        # 健康检查（可选，确保容器正常运行）
+        # livenessProbe:
+        #   httpGet:
+        #     path: /api  # Jupyter健康检查路径
+        #     port: 8888
+        #   initialDelaySeconds: 30  # 启动后30秒开始检查
+        #   periodSeconds: 10        # 每10秒检查一次
+        # readinessProbe:
+        #   httpGet:
+        #     path: /api
+        #     port: 8888
+        #   initialDelaySeconds: 10
+        #   periodSeconds: 5
+      # 关联PVC存储卷
+      volumes:
+      - name: jupyter-storage
+        persistentVolumeClaim:
+          claimName: jupyter-pvc  # 引用前面创建的PVC名称
+
+---
+
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyter-service
+  namespace: jupyter
+spec:
+  type: NodePort  # 暴露方式：NodePort
+  selector:
+    app: jupyter  # 匹配Jupyter Pod的标签
+  ports:
+  - port: 8888  # Service内部端口（与Pod的containerPort一致）
+    protocol: TCP
+    targetPort: 8888  # 指向Pod的端口
+    nodePort: 32100  # 集群节点暴露的端口（范围：30000-32767，可自定义）

@@ -1,64 +1,85 @@
+---
+# NFS存储声明（适配nfs-storage存储类）
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: windows-pvc
+  name: windows-nfs-pvc
 spec:
+  storageClassName: nfs-storage  # 匹配你的NFS存储类名
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 64Gi
-  volumeName: windows-data
-  storageClassName: pz-ssd
+      storage: 128Gi
   volumeMode: Filesystem
 ---
-apiVersion: v1
-kind: Pod
+# Deployment配置（替代原Pod）
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: windows
   labels:
-    name: windows
+    app: windows
 spec:
-  terminationGracePeriodSeconds: 120 # the Kubernetes default is 30 seconds and it may be not enough
-  containers:
-    - name: windows
-      image: registry.cn-hangzhou.aliyuncs.com/jasonkay/windows:4.04
-      ports:
-        - containerPort: 8006
-          protocol: TCP
-        - containerPort: 3389
-          protocol: TCP
-        - containerPort: 3389
-          protocol: UDP
-      securityContext:
-        privileged: true
-      env:
-        - name: VERSION
-          value: "10"
-        - name: RAM_SIZE
-          value: "8G"
-        - name: CPU_CORES
-          value: "4"
-        - name: DISK_SIZE
-          value: "64G"
-        - name: USERNAME
-          value: "Docker"
-        - name: PASSWORD
-          value: "pzxy@123456"
-
-      volumeMounts:
-        - mountPath: /storage
-          name: storage
-        - mountPath: /dev/kvm
-          name: dev-kvm
-  volumes:
-    - name: storage
-      persistentVolumeClaim:
-        claimName: windows-pvc
-    - name: dev-kvm
-      hostPath:
-        path: /dev/kvm
+  replicas: 1  # 单副本（避免存储冲突）
+  selector:
+    matchLabels:
+      app: windows
+  strategy:
+    type: Recreate  # 存储独占场景使用Recreate策略
+  template:
+    metadata:
+      labels:
+        app: windows
+    spec:
+      terminationGracePeriodSeconds: 120
+      containers:
+        - name: windows
+          image: registry.cn-hangzhou.aliyuncs.com/jasonkay/windows:4.04
+          ports:
+            - containerPort: 8006
+              protocol: TCP
+            - containerPort: 3389
+              protocol: TCP
+            - containerPort: 3389
+              protocol: UDP
+          securityContext:
+            privileged: true
+          env:
+            - name: VERSION
+              value: "10"
+            - name: RAM_SIZE
+              value: "16G"
+            - name: CPU_CORES
+              value: "12"
+            - name: DISK_SIZE
+              value: "128G"
+            - name: USERNAME
+              value: "zk"
+            - name: PASSWORD
+              value: "pzxy@123456"
+          # 添加资源限制（避免资源抢占）
+          resources:
+            requests:
+              cpu: "4"
+              memory: "8Gi"
+            limits:
+              cpu: "12"
+              memory: "16Gi"
+          volumeMounts:
+            - mountPath: /storage
+              name: storage
+            - mountPath: /dev/kvm
+              name: dev-kvm
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: windows-nfs-pvc
+        - name: dev-kvm
+          hostPath:
+            path: /dev/kvm
 ---
+# Service配置（更新标签选择器）
 apiVersion: v1
 kind: Service
 metadata:
@@ -66,7 +87,7 @@ metadata:
 spec:
   type: NodePort
   selector:
-    name: windows
+    app: windows  # 匹配Deployment标签
   ports:
     - name: tcp-8006
       protocol: TCP
